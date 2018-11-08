@@ -1,0 +1,55 @@
+version: 2
+jobs:
+  Hello-World:
+    docker:
+      - image: alpine:3.7
+    steps:
+      - run:
+          name: Hello World
+          command: |
+            echo "Hello World"
+            echo "This is multi jobs Circle Config"
+  Checkout-Code:
+    docker:
+      - image: alpine:3.7
+    steps:
+      - checkout
+      - run:
+          name: Code Has Arrived
+          command: |
+            ls -al
+            echo "Traversing the code directory"
+  Run-with-Node:
+    docker:
+      - image: circleci/node:10-browsers
+    steps:
+      - run:
+          name: Running with node
+          command: |
+            node -v
+  Now-Complete:
+    docker:
+      - image: alpine:3.7
+    steps:
+      - run:
+          name: Approval Complete
+          command: |
+            echo "It will work once approval is completed"
+
+workflows:
+  version: 2
+  jobs:
+    - Hello-World
+    - Checkout-Code:
+        requires:
+          - Hello-World
+    - Run-with-Node:
+        requires:
+          - Checkout-Code
+    - Hold-For-Approval:
+        type: approval
+        requires:
+          - Run-with-Node
+    - Now-Complete:
+        requires:
+          - Hold-For-Approval
